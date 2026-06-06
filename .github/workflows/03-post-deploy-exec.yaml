@@ -6,10 +6,10 @@ name: 'Scheduled Execution'
 # gatilhos / triggers - regras de disparo
 # gatinho manual = workflow_dispatch
 on:
-  schedule:
-    #cronograma da execução
-    # 1 - minuto, 2 - hora, 3 - dia do mes, 4 - mes, 5 - dia da semana
-    - cron: '0 4 * * 6'
+  workflow_run:
+    workflows: ['Execução Manual', 'Scheduled Execution']
+    types:
+      - completed
 
 # Tarefas dentro da pipeline
 jobs:
@@ -17,6 +17,8 @@ jobs:
   e2e-tests:
     #maquina onde o job vai rodar
     runs-on: ubuntu-latest
+
+    if: ${{github.event.workflows_run.conclusion == 'sucess' }}
 
     #passos do job
     steps:
