@@ -1,0 +1,95 @@
+# Exercício 1 - Pipeline equivalente no GitLab CI
+# Replica os três padrões de trigger do GitHub Actions:
+#   01-manual-exec    → job com when: manual
+#   02-scheduled-exec → job com rules: schedule (configurado na UI do GitLab)
+#   03-post-deploy    → job com needs: dependência dos anteriores (stages encadeados)
+
+stages:
+  - install
+  - test
+  - pos-deploy
+
+variables:
+  NODE_VERSION: '24'
+
+# Cache das dependências entre jobs para não reinstalar do zero a cada execução
+cache:
+  key: '$CI_COMMIT_REF_SLUG-node'
+  paths:
+    - node_modules/
+
+# ─── Stage: install ────────────────────────────────────────────────────────────
+
+instalar-dependencias:
+  stage: install
+  image: node:24
+  script:
+    - npm install -g yarn
+    - yarn install
+  artifacts:
+    paths:
+      - node_modules/
+    expire_in: 1 hour
+
+# ─── Stage: test ───────────────────────────────────────────────────────────────
+
+# Equivalente ao 01-manual-exec.yaml
+# Disparo: botão "Run pipeline" na UI do GitLab → selecionar este job
+e2e-manual:
+  stage: test
+  image: mcr.microsoft.com/playwright:v1.47.2-jammy
+  when: manual
+  needs: [instalar-dependencias]
+  script:
+    - npm install -g yarn
+    - yarn e2e
+  artifacts:
+    when: always
+    paths:
+      - playwright-report/
+      - results.xml
+    expire_in: 7 days
+
+# Equivalente ao 02-scheduled-exec.yaml
+# Disparo: CI/CD → Schedules na UI do GitLab (configurar cron "0 4 * * 6")
+e2e-agendado:
+  stage: test
+  image: mcr.microsoft.com/playwright:v1.47.2-jammy
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "schedule"
+  needs: [instalar-dependencias]
+  script:
+    - npm install -g yarn
+    - yarn e2e
+  artifacts:
+    when: always
+    paths:
+      - playwright-report/
+      - results.xml
+    expire_in: 7 days
+
+# ─── Stage: pos-deploy ─────────────────────────────────────────────────────────
+
+# Equivalente ao 03-post-deploy-exec.yaml
+# Roda automaticamente após e2e-manual OU e2e-agendado concluírem com sucesso.
+# O "optional: true" permite que este job execute mesmo quando apenas um dos
+# predecessores existir no pipeline atual (manual vs. schedule).
+e2e-pos-deploy:
+  stage: pos-deploy
+  image: mcr.microsoft.com/playwright:v1.47.2-jammy
+  needs:
+    - job: e2e-manual
+      optional: true
+    - job: e2e-agendado
+      optional: true
+  rules:
+    - when: on_success
+  script:
+    - npm install -g yarn
+    - yarn e2e
+  artifacts:
+    when: always
+    paths:
+      - playwright-report/
+      - results.xml
+    expire_in: 7 days
