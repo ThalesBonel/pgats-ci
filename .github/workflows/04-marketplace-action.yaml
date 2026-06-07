@@ -1,0 +1,63 @@
+# Exercício 2 - Action do Marketplace: dorny/test-reporter
+# Gera relatório visual de testes na aba "Checks" do GitHub após cada execução
+
+name: 'Marketplace Action - Test Reporter'
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [master]
+
+# Permissões necessárias para o dorny/test-reporter escrever checks na interface do GitHub
+permissions:
+  checks: write
+  pull-requests: write
+
+jobs:
+  testes-com-relatorio:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24.x
+
+      - name: Instalando Yarn
+        run: npm install -g yarn
+
+      - name: Instalando dependencias
+        run: yarn
+
+      - name: Instalando Browsers do Playwright
+        run: yarn playwright install --with-deps chromium
+
+      - name: Executando Testes Unitários (Jest)
+        run: yarn test
+        # continue-on-error garante que o reporter rode mesmo se os testes falharem
+        continue-on-error: true
+
+      - name: Executando Testes E2E (Playwright)
+        run: yarn e2e
+        continue-on-error: true
+
+      # Faz upload do relatório HTML do Playwright como artefato navegável
+      - name: Upload Relatório HTML do Playwright
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: playwright-html-report
+          path: playwright-report/
+          retention-days: 30
+
+      # Action do Marketplace: dorny/test-reporter
+      # Lê o results.xml (JUnit gerado pelo Playwright) e publica na aba Checks
+      - name: Publicar Relatório de Testes E2E
+        uses: dorny/test-reporter@v1
+        if: always()
+        with:
+          name: 'Playwright E2E - Resultados'
+          path: results.xml
+          reporter: java-junit
+          fail-on-error: false
