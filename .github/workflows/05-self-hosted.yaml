@@ -1,24 +1,4 @@
 # Exercício 3 - Self-Hosted Runner
-#
-# QUANDO FAZ SENTIDO usar self-hosted runners:
-#   - Acesso a redes/serviços internos (banco local, APIs privadas)
-#   - Hardware específico: GPU para ML, ARM, dispositivos físicos para testes mobile
-#   - Volume alto de minutos de CI (custo: GitHub cobra por minuto nos hosted runners)
-#   - Compliance: dados sensíveis que não podem trafegar fora do ambiente controlado
-#   - Ambientes legados: SO ou dependências que não existem nos runners gerenciados
-#
-# COMPARATIVO COM OUTRAS PLATAFORMAS:
-#   - GitLab CI:   "GitLab Runner" (self-hosted) — mesmo conceito, registro via token
-#   - Azure DevOps: "Self-hosted agents" — integra com agente .NET da Microsoft
-#   - CircleCI:    "Self-hosted runners" — disponível nos planos pagos
-#   - Jenkins:     É inteiramente self-hosted por natureza — cada "node" é um agente
-#
-# COMO CONFIGURAR O RUNNER LOCALMENTE (WSL2 / Linux):
-#   1. No GitHub: Settings → Actions → Runners → New self-hosted runner → Linux/x64
-#   2. Baixar o agente e extrair conforme instruções exibidas na tela
-#   3. Registrar:  ./config.sh --url https://github.com/SEU_USUARIO/SEU_REPO --token TOKEN_GERADO
-#   4. Iniciar:    ./run.sh   (ou instalar como serviço: sudo ./svc.sh install && sudo ./svc.sh start)
-#   5. Executar este workflow — o job será roteado para sua máquina
 
 name: 'Self-Hosted Runner'
 
@@ -35,6 +15,9 @@ jobs:
 
       - name: Verificar versão do Node.js
         run: node --version
+
+      - name: Instalando Yarn
+        run: npm install -g yarn
 
       - name: Instalando dependencias
         run: yarn
