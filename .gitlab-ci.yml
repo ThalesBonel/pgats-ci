@@ -24,7 +24,6 @@ instalar-dependencias:
   stage: install
   image: node:24
   script:
-    - npm install -g yarn
     - yarn install
   artifacts:
     paths:
@@ -41,7 +40,6 @@ e2e-manual:
   when: manual
   needs: [instalar-dependencias]
   script:
-    - npm install -g yarn
     - yarn e2e
   artifacts:
     when: always
@@ -59,7 +57,6 @@ e2e-agendado:
     - if: $CI_PIPELINE_SOURCE == "schedule"
   needs: [instalar-dependencias]
   script:
-    - npm install -g yarn
     - yarn e2e
   artifacts:
     when: always
@@ -85,7 +82,6 @@ e2e-pos-deploy:
   rules:
     - when: on_success
   script:
-    - npm install -g yarn
     - yarn e2e
   artifacts:
     when: always
