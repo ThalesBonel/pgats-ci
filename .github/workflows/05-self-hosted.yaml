@@ -22,11 +22,13 @@ jobs:
       - name: Instalando dependencias
         run: yarn
 
-      - name: Instalando Browsers do Playwright
-        run: yarn playwright install chromium
+      - name: Instalando Chromium do sistema
+        run: sudo snap install chromium || sudo apt-get install -y chromium-browser
 
       - name: Executando Testes e2e
         run: yarn run e2e
+        env:
+          CHROMIUM_PATH: /snap/bin/chromium
 
       - name: Upload Relatório HTML do Playwright
         uses: actions/upload-artifact@v4
