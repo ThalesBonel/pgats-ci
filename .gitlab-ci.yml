@@ -36,7 +36,7 @@ instalar-dependencias:
 # Disparo: botão "Run pipeline" na UI do GitLab → selecionar este job
 e2e-manual:
   stage: test
-  image: mcr.microsoft.com/playwright:v1.47.2-jammy
+  image: mcr.microsoft.com/playwright:v1.60.0-jammy
   when: manual
   needs: [instalar-dependencias]
   script:
@@ -52,7 +52,7 @@ e2e-manual:
 # Disparo: CI/CD → Schedules na UI do GitLab (configurar cron "0 4 * * 6")
 e2e-agendado:
   stage: test
-  image: mcr.microsoft.com/playwright:v1.47.2-jammy
+  image: mcr.microsoft.com/playwright:v1.60.0-jammy
   rules:
     - if: $CI_PIPELINE_SOURCE == "schedule"
   needs: [instalar-dependencias]
@@ -73,7 +73,7 @@ e2e-agendado:
 # predecessores existir no pipeline atual (manual vs. schedule).
 e2e-pos-deploy:
   stage: pos-deploy
-  image: mcr.microsoft.com/playwright:v1.47.2-jammy
+  image: mcr.microsoft.com/playwright:v1.60.0-jammy
   needs:
     - job: e2e-manual
       optional: true
