@@ -22,8 +22,13 @@ jobs:
       - name: Instalando dependencias
         run: yarn
 
-      - name: Instalando Chromium do sistema
-        run: sudo snap install chromium || sudo apt-get install -y chromium-browser
+      - name: Instalando Chromium do sistema (se necessário)
+        run: |
+          if command -v chromium >/dev/null 2>&1 || command -v chromium-browser >/dev/null 2>&1; then
+            echo "Chromium já instalado, pulando instalação."
+          else
+            sudo snap install chromium || sudo apt-get install -y chromium-browser
+          fi
 
       - name: Executando Testes e2e
         run: yarn run e2e

@@ -35,14 +35,12 @@ jobs:
 
       - name: Executando Testes Unitários (Jest)
         run: yarn test
-        # continue-on-error garante que o reporter rode mesmo se os testes falharem
         continue-on-error: true
 
       - name: Executando Testes E2E (Playwright)
         run: yarn e2e
         continue-on-error: true
 
-      # Faz upload do relatório HTML do Playwright como artefato navegável
       - name: Upload Relatório HTML do Playwright
         uses: actions/upload-artifact@v4
         if: always()
